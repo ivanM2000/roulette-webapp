@@ -124,7 +124,7 @@ let totalOffset = 0;
       const itemWidth = 90;
       const wrapperWidth = 320;
       const pointerOffset = wrapperWidth / 2;
-      const rounds = Math.floor(Math.random() * 15 + 15);
+      const rounds = 25 + Math.floor(Math.random() * 10);
       const index = Math.floor(Math.random() * numbers.length);
       const stepCount = numbers.length * rounds + index;
       const offset = totalOffset + stepCount * itemWidth;
@@ -134,11 +134,13 @@ let totalOffset = 0;
         renderItems(100);
       }
 
-      roulette.style.transition = `transform 6.5s cubic-bezier(0.25, 1, 0.35, 1)`;
+      const duration = 6.5;
+      roulette.style.transition = `transform ${duration}s linear`;
       roulette.style.transform = `translateX(-${offset}px)`;
       totalOffset = offset;
 
       setTimeout(() => {
+        const durationMs = duration * 1000;
         const indexAtCenter = Math.floor((offset + pointerOffset) / itemWidth);
         const item = roulette.children[indexAtCenter];
         const resultNumber = item ? item.textContent : "?";
@@ -147,7 +149,7 @@ let totalOffset = 0;
         result.style.opacity = 1;
         button.disabled = false;
         isRolling = false;
-      }, 6600);
+      }, durationMs + 100);
     }
 
     renderItems();
