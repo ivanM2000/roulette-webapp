@@ -103,7 +103,7 @@
 
     function renderItems() {
       roulette.innerHTML = '';
-      const allItems = [...numbers, ...numbers, ...numbers, ...numbers, ...numbers];
+      const allItems = [...numbers, ...numbers, ...numbers, ...numbers, ...numbers, ...numbers];
       for (let num of allItems) {
         const el = document.createElement("div");
         el.className = "item";
@@ -124,23 +124,26 @@
 
       const itemWidth = 90;
       const index = Math.floor(Math.random() * numbers.length);
-      const baseOffset = (numbers.length * 2 + index) * itemWidth - 120;
+      const finalOffset = (numbers.length * 4 + index) * itemWidth - 120;
 
-      roulette.style.transition = 'none';
-      roulette.style.transform = 'translateX(0px)';
-
-      // Запускаем с небольшой задержкой, чтобы reset применился
-      setTimeout(() => {
-        roulette.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
-        roulette.style.transform = `translateX(-${baseOffset}px)`;
-      }, 20);
+      // Фаза 1: быстрая прокрутка (крутится сильно дальше цели)
+      const overshoot = finalOffset + 600; // добавим запас
+      roulette.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)';
+      roulette.style.transform = `translateX(-${overshoot}px)`;
 
       setTimeout(() => {
-        result.textContent = `Выпало число: ${numbers[index]}`;
-        result.style.opacity = 1;
-        button.disabled = false;
-        isRolling = false;
-      }, 5200);
+        // Фаза 2: плавное торможение до нужного числа
+        roulette.style.transition = 'transform 1s ease-out';
+        roulette.style.transform = `translateX(-${finalOffset}px)`;
+
+        setTimeout(() => {
+          result.textContent = `Выпало число: ${numbers[index]}`;
+          result.style.opacity = 1;
+          button.disabled = false;
+          isRolling = false;
+        }, 1000);
+
+      }, 4000);
     }
 
     renderItems();
