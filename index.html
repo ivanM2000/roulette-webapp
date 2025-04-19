@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Горизонтальная рулетка 1–100</title>
+  <title>Горизонтальная рулетка 1–100 с плавным торможением</title>
   <style>
     body {
       margin: 0;
@@ -11,23 +11,27 @@
       background: #1a1a1a;
       color: #fff;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; overflow: hidden;
     }
     .roulette-wrapper {
       position: relative;
-      width: 90%;
-      max-width: 900px;
+      width: 600px;      /* ширина области прокрутки */
       height: 80px;
       overflow: hidden;
       border: 2px solid #444;
       border-radius: 8px;
-      background: #2a2a2a;
+      background: #3a3a3a; /* тот же фон, что у ячеек */
       margin-bottom: 20px;
+    }
+    .indicator {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%; width: 4px;
+      background: #ffcc00;
+      transform: translateX(-50%);
+      z-index: 2;
     }
     .roulette {
       display: flex;
@@ -38,8 +42,7 @@
       height: 80px;
       line-height: 80px;
       text-align: center;
-      font-size: 18px;
-      font-weight: bold;
+      font-size: 18px; font-weight: bold;
       border-right: 1px solid #444;
       background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
       color: #ddd;
@@ -47,29 +50,16 @@
     .item:nth-child(odd) {
       background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
     }
-    .indicator {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: #ffcc00;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-    }
     .btn {
       padding: 10px 20px;
       font-size: 18px;
       background: #ffcc00;
       color: #222;
-      border: none;
-      border-radius: 4px;
+      border: none; border-radius: 4px;
       cursor: pointer;
       transition: background .3s;
     }
-    .btn:hover {
-      background: #e6b800;
-    }
+    .btn:hover { background: #e6b800; }
     .result {
       margin-top: 15px;
       font-size: 20px;
@@ -88,7 +78,7 @@
   <div class="result" id="result"></div>
 
   <script>
-    // Функция тасования Fisher–Yates
+    // Fisher–Yates shuffle
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -96,61 +86,61 @@
       }
     }
 
-    const roulette = document.getElementById('roulette');
-    const spinBtn = document.getElementById('spinBtn');
-    const result = document.getElementById('result');
+    document.addEventListener('DOMContentLoaded', ()=> {
+      const roulette = document.getElementById('roulette');
+      const spinBtn  = document.getElementById('spinBtn');
+      const result   = document.getElementById('result');
 
-    // создаём массив 1–100
-    const base = Array.from({ length: 100 }, (_, i) => i + 1);
-    shuffle(base);              // перемешиваем
-    const count = base.length;  // 100
-    const times = 7;            // дублируем 7 раз
-    const mid = Math.floor(times / 2); // =3
-    const w = 60;               // ширина одного элемента
+      const base  = Array.from({length:100},(_,i)=>i+1);
+      shuffle(base);
+      const count = base.length;   // 100
+      const times = 7;             // дублируем 7 раз
+      const mid   = Math.floor(times/2);
+      const w     = 60;            // ширина одной ячейки
 
-    // строим ленту
-    window.addEventListener('load', () => {
-      for (let t = 0; t < times; t++) {
-        base.forEach(n => {
+      // Строим ленту
+      for (let t=0; t<times; t++) {
+        base.forEach(n=>{
           const d = document.createElement('div');
-          d.className = 'item';
+          d.className   = 'item';
           d.textContent = n;
           roulette.appendChild(d);
         });
       }
-      // стартовая позиция — центр ленты
+
+      // Устанавливаем стартовую позицию в центр ленты
       const startIdx = mid * count;
       roulette.style.transition = 'none';
-      roulette.style.transform = `translateX(-${startIdx * w}px)`;
-    });
+      roulette.style.transform  = `translateX(-${startIdx * w}px)`;
 
-    spinBtn.addEventListener('click', () => {
-      spinBtn.disabled = true;
-      result.textContent = '';
+      spinBtn.addEventListener('click', ()=>{
+        spinBtn.disabled = true;
+        result.textContent = '';
 
-      // выпавшее число
-      const num = Math.floor(Math.random() * count) + 1;
-      // циклов от 1 до times-2, чтобы не выехать за пределы
-      const cyc = Math.floor(Math.random() * (times - 2)) + 1;
-      // индекс в первом наборе
-      const idxIn = base.indexOf(num);
-      // полный индекс в ленте = mid*count + cyc*count + idxIn
-      const idx = mid * count + cyc * count + idxIn;
-      const px = idx * w;
+        // выбираем число и цикл
+        const num = Math.floor(Math.random() * count) + 1;
+        const cyc = Math.floor(Math.random() * (times - 2)) + 1;
+        const idxIn = base.indexOf(num);
 
-      // увеличиваем скорость: прокрутка за 1.5 секунды
-      roulette.style.transition = 'transform 1.5s cubic-bezier(0.25,0.1,0.25,1)';
-      roulette.style.transform = `translateX(-${px}px)`;
+        // вычисляем полный сдвиг
+        const fullIdx = mid*count + cyc*count + idxIn;
+        const px = fullIdx * w;
 
-      roulette.addEventListener('transitionend', function handler() {
-        // убираем transition и фиксируем позицию в центре набора
-        roulette.style.transition = 'none';
-        const fixIdx = mid * count + idxIn;
-        roulette.style.transform = `translateX(-${fixIdx * w}px)`;
-        spinBtn.disabled = false;
-        result.textContent = `Выпало число: ${num}`;
-        roulette.removeEventListener('transitionend', handler);
-      }, { once: true });
+        // анимируем 6.5s с ease‑out
+        roulette.style.transition = 'transform 6.5s cubic-bezier(0,0,0.58,1)';
+        roulette.style.transform  = `translateX(-${px}px)`;
+
+        roulette.addEventListener('transitionend', function h(){
+          // фиксируем центр + выбранное число
+          roulette.style.transition = 'none';
+          const fixIdx = mid*count + idxIn;
+          roulette.style.transform  = `translateX(-${fixIdx * w}px)`;
+
+          result.textContent = `Выпало число: ${num}`;
+          spinBtn.disabled = false;
+          roulette.removeEventListener('transitionend', h);
+        }, { once:true });
+      });
     });
   </script>
 
