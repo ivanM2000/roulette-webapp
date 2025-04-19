@@ -101,19 +101,15 @@
     const roulette = document.getElementById("roulette");
     const button = document.getElementById("spinBtn");
 
-    function renderItems() {
+    function renderItems(repeat = 50) {
       roulette.innerHTML = '';
-      const allItems = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < repeat; i++) {
         for (let num of numbers) {
           const el = document.createElement("div");
           el.className = "item";
           el.textContent = num;
-          allItems.push(el);
+          roulette.appendChild(el);
         }
-      }
-      for (let el of allItems) {
-        roulette.appendChild(el);
       }
     }
 
@@ -130,13 +126,27 @@
       const itemWidth = 90;
       const index = Math.floor(Math.random() * numbers.length);
       const rounds = Math.floor(Math.random() * 5 + 10);
-      const offset = (numbers.length * rounds + index) * itemWidth - 120;
+      const totalSteps = (numbers.length * rounds + index);
+      const offset = totalSteps * itemWidth - 120;
 
-      // Сброс в начало мгновенно (без анимации)
+      const totalItems = roulette.children.length;
+      const neededItems = totalSteps + 5;
+
+      if (totalItems < neededItems) {
+        const toAdd = Math.ceil((neededItems - totalItems) / numbers.length);
+        for (let i = 0; i < toAdd; i++) {
+          for (let num of numbers) {
+            const el = document.createElement("div");
+            el.className = "item";
+            el.textContent = num;
+            roulette.appendChild(el);
+          }
+        }
+      }
+
       roulette.style.transition = 'none';
       roulette.style.transform = 'translateX(0px)';
 
-      // Даем браузеру время отрисовать сброс, а затем анимируем прокрут
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
