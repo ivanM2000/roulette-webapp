@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Горизонтальная рулетка</title>
+  <title>Горизонтальная рулетка 1–100</title>
   <style>
     body {
       margin: 0;
@@ -20,8 +20,8 @@
     }
     .roulette-wrapper {
       position: relative;
-      width: 80%;
-      max-width: 800px;
+      width: 90%;
+      max-width: 900px;
       height: 80px;
       overflow: hidden;
       border: 2px solid #444;
@@ -34,11 +34,11 @@
       transform: translateX(0);
     }
     .item {
-      flex: 0 0 80px;
+      flex: 0 0 60px;
       height: 80px;
       line-height: 80px;
       text-align: center;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       border-right: 1px solid #444;
       background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
@@ -88,10 +88,10 @@
   <div class="result" id="result"></div>
 
   <script>
-    // Фишер–Йетс для первого случайного порядка
+    // Тасование Фишера–Йетса
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
     }
@@ -100,25 +100,25 @@
     const spinBtn = document.getElementById('spinBtn');
     const result = document.getElementById('result');
 
-    const base = [1,2,3,4,5,6,7,8,9,10];
-    shuffle(base);                   // вразнобой
-    const count = base.length;       // 10
-    const times = 5;                 // дублируем 5 раз
+    const base = Array.from({length: 100}, (_, i) => i + 1);
+    shuffle(base);               // перемешиваем
+    const count = base.length;   // 100
+    const times = 5;             // дублируем 5 раз
     const mid = Math.floor(times/2); // =2
-    const w = 80;                    // ширина одного элемента
+    const w = 60;                // ширина одного элемента в px
 
     // Собираем ленту
     window.addEventListener('load', () => {
       for (let t = 0; t < times; t++) {
         base.forEach(n => {
-          let d = document.createElement('div');
+          const d = document.createElement('div');
           d.className = 'item';
           d.textContent = n;
           roulette.appendChild(d);
         });
       }
       // стартовая позиция — центр ленты
-      let startIdx = mid * count;
+      const startIdx = mid * count;
       roulette.style.transform = `translateX(-${startIdx * w}px)`;
     });
 
@@ -126,30 +126,31 @@
       spinBtn.disabled = true;
       result.textContent = '';
 
-      // что выпало
-      let num = Math.floor(Math.random() * count) + 1;
-      // сколько блоков прокрутить (1…times-2), чтобы не уехать за край
-      let cyc = Math.floor(Math.random() * (times - 2)) + 1;
-      // где в ленте лежит наш номер
-      let idxIn = base.indexOf(num);
-      // итоговый индекс для анимации
-      let idx = mid * count + cyc * count + idxIn;
-      let px = idx * w;
+      // случайное число 1–100
+      const num = Math.floor(Math.random() * count) + 1;
+      // циклов 1…(times-1)
+      const cyc = Math.floor(Math.random() * (times - 1)) + 1;
+      // находим индекс выпавшего в первом блоке
+      const idxIn = base.indexOf(num);
+      // полный индекс в ленте: mid*count + cyc*count + idxIn
+      const idx = mid * count + cyc * count + idxIn;
+      const px = idx * w;
 
-      // анимируем строго влево
-      roulette.style.transition = 'transform 4s ease';
+      // увеличиваем скорость: 2 секунды прокрутка
+      roulette.style.transition = 'transform 2s ease';
       roulette.style.transform = `translateX(-${px}px)`;
 
-      roulette.addEventListener('transitionend', function h() {
-        // сбрасываем без анимации на середину + номер
+      roulette.addEventListener('transitionend', function handler() {
+        // сбрасываем без анимации
         roulette.style.transition = 'none';
-        let fixIdx = mid * count + idxIn;
+        const fixIdx = mid * count + idxIn;
         roulette.style.transform = `translateX(-${fixIdx * w}px)`;
         spinBtn.disabled = false;
         result.textContent = `Выпало число: ${num}`;
-        roulette.removeEventListener('transitionend', h);
+        roulette.removeEventListener('transitionend', handler);
       }, { once: true });
     });
   </script>
+
 </body>
 </html>
