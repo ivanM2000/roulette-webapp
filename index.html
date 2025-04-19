@@ -36,7 +36,7 @@
       left: 0;
       top: 0;
       height: 100%;
-      transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1);
+      transform: translateX(0);
     }
     .item {
       width: 80px;
@@ -80,6 +80,11 @@
       border-radius: 10px;
       cursor: pointer;
       backdrop-filter: blur(5px);
+      transition: opacity 0.3s;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -88,7 +93,7 @@
     <div class="pointer"></div>
     <div class="roulette" id="roulette"></div>
   </div>
-  <button onclick="roll()">Крутить</button>
+  <button onclick="roll(this)">Крутить</button>
   <div class="result" id="result"></div>
 
   <script>
@@ -106,22 +111,35 @@
       }
     }
 
-    function roll() {
+    function roll(button) {
       const result = document.getElementById("result");
       result.style.opacity = 0;
+      button.disabled = true;
+
       const index = Math.floor(Math.random() * numbers.length);
       const itemWidth = 90;
-      const offset = (numbers.length + index) * itemWidth - 120;
+      const baseOffset = (numbers.length + index) * itemWidth - 120;
 
-      roulette.style.transform = `translateX(-${offset}px)`;
+      // стартовая прокрутка
+      roulette.style.transition = 'transform 3s linear';
+      roulette.style.transform = `translateX(-${baseOffset - 300}px)`;
 
       setTimeout(() => {
-        result.textContent = `Выпало число: ${numbers[index]}`;
-        result.style.opacity = 1;
-      }, 4100);
+        // замедление до нужного числа
+        roulette.style.transition = 'transform 1.5s ease-out';
+        roulette.style.transform = `translateX(-${baseOffset}px)`;
+
+        setTimeout(() => {
+          result.textContent = `Выпало число: ${numbers[index]}`;
+          result.style.opacity = 1;
+          button.disabled = false;
+        }, 1600);
+
+      }, 3000);
     }
 
     renderItems();
   </script>
 </body>
 </html>
+
