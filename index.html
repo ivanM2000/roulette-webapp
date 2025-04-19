@@ -149,7 +149,7 @@ let currentTranslate = 0;
       roulette.style.transform = `translateX(${currentTranslate}px)`;
 
       setTimeout(() => {
-        const centerIndex = Math.round((offset + 160) / itemWidth);
+        const centerIndex = Math.floor((Math.abs(currentTranslate) + 160) / itemWidth);
         const item = roulette.children[centerIndex];
         result.textContent = `Выпало число: ${item ? item.textContent : '?'}`;
         result.style.opacity = 1;
@@ -166,3 +166,4 @@ let currentTranslate = 0;
   </script>
 </body>
 </html>
+
