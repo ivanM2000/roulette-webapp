@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Цикличная рулетка 1–100</title>
+  <title>Реалистичная рулетка 1–100</title>
   <style>
     body {
       margin: 0; padding: 0;
-      background: #1a1a1a; color: #fff;
+      background: #111; color: #fff;
       font-family: Arial, sans-serif;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -17,40 +17,56 @@
       position: relative;
       width: 600px; height: 80px;
       overflow: hidden;
-      border: 2px solid #444; border-radius: 8px;
-      background: #3a3a3a; margin-bottom: 20px;
+      border: 3px solid #555;
+      border-radius: 10px;
+      background: #2a2a2a;
+      margin-bottom: 20px;
     }
     .indicator {
-      position: absolute; top: 0; bottom: 0;
-      left: 50%; width: 4px;
-      background: #ffcc00; transform: translateX(-50%);
-      z-index: 2;
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #ffcc00;
+      transform: translateX(-50%);
+      z-index: 10;
     }
     .roulette {
       display: flex;
       transform: translateX(0);
     }
     .item {
-      flex: 0 0 60px; height: 80px;
-      line-height: 80px; text-align: center;
-      font-size: 22px; font-weight: bold;
+      flex: 0 0 60px;
+      height: 80px;
+      line-height: 80px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
       border-right: 1px solid #444;
-      background: linear-gradient(135deg,#3a3a3a,#4a4a4a);
-      color: #ddd;
+      background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+      color: #eee;
+      transition: background 0.3s, color 0.3s;
     }
-    .item:nth-child(odd) {
-      background: linear-gradient(135deg,#4a4a4a,#5a5a5a);
+    .item.active {
+      background: #ffcc00 !important;
+      color: #222;
     }
     .btn {
-      padding: 10px 20px; font-size: 18px;
-      background: #ffcc00; color: #222;
-      border: none; border-radius: 4px;
-      cursor: pointer; transition: background .3s;
+      padding: 10px 22px;
+      font-size: 18px;
+      background: #ffcc00;
+      color: #222;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
       margin-bottom: 10px;
     }
-    .btn:hover { background: #e6b800; }
+    .btn:hover {
+      background: #e0b400;
+    }
     .result {
-      font-size: 20px; height: 24px;
+      font-size: 22px;
+      min-height: 28px;
     }
   </style>
 </head>
@@ -64,6 +80,8 @@
   <button class="btn" id="spinBtn">Крутить</button>
   <div class="result" id="result"></div>
 
+  <audio id="tickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_fdc017ff74.mp3?filename=button-124476.mp3"></audio>
+
   <script>
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -76,26 +94,26 @@
       const roulette = document.getElementById('roulette');
       const spinBtn  = document.getElementById('spinBtn');
       const result   = document.getElementById('result');
+      const tick     = document.getElementById('tickSound');
 
-      const base  = Array.from({length:100}, (_,i)=>i+1);
+      const base = Array.from({ length: 100 }, (_, i) => i + 1);
       shuffle(base);
 
       const count = base.length;
-      const times = 7; // Дублируем для цикличности
-      const mid   = Math.floor(times/2);
-      const w     = 60; // ширина .item
+      const times = 8;
+      const mid = Math.floor(times / 2);
+      const w = 60;
 
       // Строим ленту
       for (let t = 0; t < times; t++) {
         base.forEach(n => {
           const d = document.createElement('div');
-          d.className   = 'item';
+          d.className = 'item';
           d.textContent = n;
           roulette.appendChild(d);
         });
       }
 
-      // Начальное положение: центр
       const startIdx = mid * count;
       roulette.style.transform = `translateX(-${startIdx * w}px)`;
 
@@ -103,21 +121,33 @@
         spinBtn.disabled = true;
         result.textContent = '';
 
+        // Удаляем выделение
+        document.querySelectorAll('.item').forEach(e => e.classList.remove('active'));
+
         const num = Math.floor(Math.random() * count) + 1;
-        const maxCycles = times - mid - 1;
-        const cyc = Math.floor(Math.random() * maxCycles) + 1;
+        const maxCycles = times - mid - 2;
+        const cyc = Math.floor(Math.random() * maxCycles) + 2;
         const idxIn = base.indexOf(num);
         const fullIdx = mid * count + cyc * count + idxIn;
         const px = fullIdx * w;
 
-        // Анимация 7s с замедлением
-        roulette.style.transition = 'transform 7s cubic-bezier(0,0,0.58,1)';
-        roulette.style.transform  = `translateX(-${px}px)`;
+        // Анимация — 10 секунд с реалистичным easing
+        roulette.style.transition = 'transform 10s cubic-bezier(0.1, 0.5, 0.1, 1)';
+        roulette.style.transform = `translateX(-${px}px)`;
+
+        tick.play();
 
         roulette.addEventListener('transitionend', function handler() {
-          const fixIdx = mid * count + idxIn;
           roulette.style.transition = 'none';
-          roulette.style.transform  = `translateX(-${fixIdx * w}px)`;
+          const fixIdx = mid * count + idxIn;
+          roulette.style.transform = `translateX(-${fixIdx * w}px)`;
+
+          const items = document.querySelectorAll('.item');
+          if (items[fixIdx]) {
+            items[fixIdx].classList.add('active');
+          }
+
+          tick.play();
           result.textContent = `Выпало число: ${num}`;
           spinBtn.disabled = false;
           roulette.removeEventListener('transitionend', handler);
