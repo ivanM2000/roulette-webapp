@@ -103,7 +103,7 @@
 
     function renderItems() {
       roulette.innerHTML = '';
-      const allItems = [...numbers, ...numbers, ...numbers];
+      const allItems = [...numbers, ...numbers, ...numbers, ...numbers];
       for (let num of allItems) {
         const el = document.createElement("div");
         el.className = "item";
@@ -122,11 +122,12 @@
       const result = document.getElementById("result");
       result.style.opacity = 0;
 
-      const index = Math.floor(Math.random() * numbers.length);
       const itemWidth = 90;
-      const offset = (numbers.length + index) * itemWidth - 120;
+      const visibleItems = 3.5; // приблизительно сколько элементов видно в окне
+      const spins = 10 + Math.floor(Math.random() * 10); // сколько элементов прокрутить
+      const index = Math.floor(Math.random() * numbers.length);
+      const offset = (numbers.length * 2 + index) * itemWidth - (itemWidth * visibleItems);
 
-      // полная прокрутка слева направо с замедлением
       roulette.style.transition = 'transform 5s ease-out';
       roulette.style.transform = `translateX(-${offset}px)`;
 
