@@ -30,7 +30,7 @@
     }
     .roulette {
       display: flex;
-      animation: none;
+      transform: translateX(0);
     }
     .roulette .item {
       flex: 0 0 80px;
@@ -74,11 +74,6 @@
       font-size: 20px;
       height: 24px;
     }
-
-    @keyframes spin {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(var(--shift)); }
-    }
   </style>
 </head>
 <body>
@@ -86,27 +81,22 @@
   <div class="roulette-wrapper">
     <div class="indicator"></div>
     <div class="roulette" id="roulette">
-      <!-- Повторим элементы дважды для цикличности -->
-      <div class="item">1</div>
-      <div class="item">2</div>
-      <div class="item">3</div>
-      <div class="item">4</div>
-      <div class="item">5</div>
-      <div class="item">6</div>
-      <div class="item">7</div>
-      <div class="item">8</div>
-      <div class="item">9</div>
-      <div class="item">10</div>
-      <div class="item">1</div>
-      <div class="item">2</div>
-      <div class="item">3</div>
-      <div class="item">4</div>
-      <div class="item">5</div>
-      <div class="item">6</div>
-      <div class="item">7</div>
-      <div class="item">8</div>
-      <div class="item">9</div>
-      <div class="item">10</div>
+      <!-- Дублируем 5 раз для длинной ленты -->
+      <!-- Блок 1 -->
+      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
+      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
+      <!-- Блок 2 -->
+      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
+      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
+      <!-- Блок 3 -->
+      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
+      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
+      <!-- Блок 4 -->
+      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
+      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
+      <!-- Блок 5 -->
+      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
+      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
     </div>
   </div>
 
@@ -118,39 +108,43 @@
     const spinBtn = document.getElementById('spinBtn');
     const result = document.getElementById('result');
 
-    // ширина одного элемента
-    const itemWidth = 80;
-    // общее число уникальных элементов
-    const count = 10;
-
+    const itemWidth = 80;      // ширина одного элемента
+    const count = 10;          // уникальных чисел
+    const times = 5;           // сколько раз продублировали
+    
     spinBtn.addEventListener('click', () => {
       spinBtn.disabled = true;
       result.textContent = '';
 
-      // случайное число от 1 до 10
+      // случайное число 1–10
       const number = Math.floor(Math.random() * count) + 1;
-      // сколько полных циклов прокрутить (2–4)
-      const cycles = Math.floor(Math.random() * 3) + 2;
-      // конечный сдвиг: (cycles * count + (number - 1)) элементов * ширина элемента
-      const shiftElements = cycles * count + (number - 1);
-      const shiftPx = shiftElements * itemWidth;
+      // циклов от 1 до times−1
+      const cycles = Math.floor(Math.random() * (times - 1)) + 1;
+      // индекс позиции в ленте
+      const idx = cycles * count + (number - 1);
+      const shiftPx = idx * itemWidth;
 
-      // устанавливаем CSS-переменную для анимации
-      roulette.style.setProperty('--shift', `-${shiftPx}px`);
-      roulette.style.animation = `spin 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+      // анимируем через transition
+      roulette.style.transition = 'transform 4s ease';
+      roulette.style.transform = `translateX(-${shiftPx}px)`;
 
-      // по окончании анимации
-      roulette.addEventListener('animationend', function handler() {
-        roulette.style.animation = 'none';
-        // сбросим translateX, но оставим визуально на том же месте
-        roulette.style.transform = `translateX(-${(number - 1) * itemWidth}px)`;
+      roulette.addEventListener('transitionend', function handler() {
+        roulette.style.transition = 'none';
+        // фиксируем на позицию выбранного числа
+        roulette.style.transform = `translateX(-${idx * itemWidth}px)`;
         spinBtn.disabled = false;
         result.textContent = `Выпало число: ${number}`;
-        // уберём слушатель
-        roulette.removeEventListener('animationend', handler);
+        roulette.removeEventListener('transitionend', handler);
       }, { once: true });
     });
+
+    // начальная позиция — середина ленты
+    window.onload = () => {
+      const startIdx = count * Math.floor(times/2);
+      roulette.style.transform = `translateX(-${startIdx * itemWidth}px)`;
+    };
   </script>
 
 </body>
 </html>
+
