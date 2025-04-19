@@ -88,11 +88,11 @@
   <div class="result" id="result"></div>
 
   <script>
-    // Утилита для тасования Фишера–Йетса
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    // Фишер–Йетс для первого случайного порядка
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
     }
 
@@ -100,51 +100,54 @@
     const spinBtn = document.getElementById('spinBtn');
     const result = document.getElementById('result');
 
-    const baseNumbers = [1,2,3,4,5,6,7,8,9,10];
-    const count = baseNumbers.length;
-    const times = 5;             // сколько раз повторяем
-    const midBlock = Math.floor(times / 2);
-    const itemWidth = 80;        // ширина одного элемента
-
-    let numbers = [...baseNumbers];
-    shuffle(numbers);            // перемешиваем один раз в начале
+    const base = [1,2,3,4,5,6,7,8,9,10];
+    shuffle(base);                   // вразнобой
+    const count = base.length;       // 10
+    const times = 5;                 // дублируем 5 раз
+    const mid = Math.floor(times/2); // =2
+    const w = 80;                    // ширина одного элемента
 
     // Собираем ленту
     window.addEventListener('load', () => {
       for (let t = 0; t < times; t++) {
-        numbers.forEach(num => {
-          const div = document.createElement('div');
-          div.className = 'item';
-          div.textContent = num;
-          roulette.appendChild(div);
+        base.forEach(n => {
+          let d = document.createElement('div');
+          d.className = 'item';
+          d.textContent = n;
+          roulette.appendChild(d);
         });
       }
-      // выставляем начальную позицию по центру ленты
-      const startIdx = midBlock * count;
-      roulette.style.transform = `translateX(-${startIdx * itemWidth}px)`;
+      // стартовая позиция — центр ленты
+      let startIdx = mid * count;
+      roulette.style.transform = `translateX(-${startIdx * w}px)`;
     });
 
     spinBtn.addEventListener('click', () => {
       spinBtn.disabled = true;
       result.textContent = '';
 
-      const chosen = Math.floor(Math.random() * count) + 1;
-      const cycles = Math.floor(Math.random() * (times - 1)) + 1;
-      const idxInBlock = numbers.indexOf(chosen);
-      const shiftElements = midBlock * count + cycles * count + idxInBlock;
-      const shiftPx = shiftElements * itemWidth;
+      // что выпало
+      let num = Math.floor(Math.random() * count) + 1;
+      // сколько блоков прокрутить (1…times-2), чтобы не уехать за край
+      let cyc = Math.floor(Math.random() * (times - 2)) + 1;
+      // где в ленте лежит наш номер
+      let idxIn = base.indexOf(num);
+      // итоговый индекс для анимации
+      let idx = mid * count + cyc * count + idxIn;
+      let px = idx * w;
 
+      // анимируем строго влево
       roulette.style.transition = 'transform 4s ease';
-      roulette.style.transform = `translateX(-${shiftPx}px)`;
+      roulette.style.transform = `translateX(-${px}px)`;
 
-      roulette.addEventListener('transitionend', function handler() {
+      roulette.addEventListener('transitionend', function h() {
+        // сбрасываем без анимации на середину + номер
         roulette.style.transition = 'none';
-        // фиксируем указатель на выбранном элементе
-        const finalIdx = midBlock * count + idxInBlock;
-        roulette.style.transform = `translateX(-${finalIdx * itemWidth}px)`;
+        let fixIdx = mid * count + idxIn;
+        roulette.style.transform = `translateX(-${fixIdx * w}px)`;
         spinBtn.disabled = false;
-        result.textContent = `Выпало число: ${chosen}`;
-        roulette.removeEventListener('transitionend', handler);
+        result.textContent = `Выпало число: ${num}`;
+        roulette.removeEventListener('transitionend', h);
       }, { once: true });
     });
   </script>
