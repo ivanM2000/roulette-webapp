@@ -122,14 +122,13 @@
       result.style.opacity = 0;
 
       const itemWidth = 90;
-      const index = Math.floor(Math.random() * numbers.length);
       const rounds = Math.floor(Math.random() * 5 + 10);
+      const index = Math.floor(Math.random() * numbers.length);
       const stepCount = numbers.length * rounds + index;
       const offset = stepCount * itemWidth;
 
       currentOffset += offset;
 
-      // Проверка: если длина ленты меньше необходимой — добавим ещё
       const requiredItems = Math.ceil(currentOffset / itemWidth) + numbers.length;
       if (roulette.children.length < requiredItems) {
         renderItems(50);
@@ -139,7 +138,12 @@
       roulette.style.transform = `translateX(-${currentOffset}px)`;
 
       setTimeout(() => {
-        result.textContent = `Выпало число: ${numbers[index]}`;
+        const center = currentOffset + 160; // половина .roulette-wrapper ширины
+        const indexAtCenter = Math.floor(center / itemWidth);
+        const item = roulette.children[indexAtCenter];
+        const resultNumber = item ? item.textContent : "?";
+
+        result.textContent = `Выпало число: ${resultNumber}`;
         result.style.opacity = 1;
         button.disabled = false;
         isRolling = false;
