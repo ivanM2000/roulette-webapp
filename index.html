@@ -111,7 +111,6 @@
     }
 
     let isRolling = false;
-    let currentOffset = 0;
 
     function roll() {
       if (isRolling) return;
@@ -123,27 +122,22 @@
 
       const itemWidth = 90;
       const wrapperWidth = 320;
-      const pointerOffset = wrapperWidth / 2 - 5;
+      const pointerOffset = wrapperWidth / 2;
       const rounds = Math.floor(Math.random() * 15 + 15);
       const index = Math.floor(Math.random() * numbers.length);
       const stepCount = numbers.length * rounds + index;
       const offset = stepCount * itemWidth;
 
-      currentOffset += offset;
-
-      const requiredItems = Math.ceil(currentOffset / itemWidth) + numbers.length;
+      const requiredItems = stepCount + numbers.length;
       if (roulette.children.length < requiredItems) {
-        renderItems(50);
+        renderItems(100);
       }
 
-      const duration = 6.5;
-      const easing = ['cubic-bezier(0.25, 1, 0.35, 1)', 'ease-out', 'ease-in-out'][Math.floor(Math.random() * 3)];
-      roulette.style.transition = `transform ${duration}s ${easing}`;
-      roulette.style.transform = `translateX(-${currentOffset}px)`;
+      roulette.style.transition = `transform 6.5s cubic-bezier(0.25, 1, 0.35, 1)`;
+      roulette.style.transform = `translateX(-${offset}px)`;
 
-      const durationMs = parseFloat(duration) * 1000;
       setTimeout(() => {
-        const indexAtCenter = Math.round((currentOffset + pointerOffset) / itemWidth);
+        const indexAtCenter = Math.floor((offset + pointerOffset) / itemWidth);
         const item = roulette.children[indexAtCenter];
         const resultNumber = item ? item.textContent : "?";
 
@@ -151,7 +145,7 @@
         result.style.opacity = 1;
         button.disabled = false;
         isRolling = false;
-      }, durationMs + 100);
+      }, 6600);
     }
 
     renderItems();
