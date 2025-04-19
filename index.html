@@ -122,6 +122,8 @@
       result.style.opacity = 0;
 
       const itemWidth = 90;
+      const wrapperWidth = 320;
+      const pointerOffset = wrapperWidth / 2;
       const rounds = Math.floor(Math.random() * 5 + 10);
       const index = Math.floor(Math.random() * numbers.length);
       const stepCount = numbers.length * rounds + index;
@@ -138,7 +140,7 @@
       roulette.style.transform = `translateX(-${currentOffset}px)`;
 
       setTimeout(() => {
-        const indexAtCenter = Math.round(currentOffset / itemWidth);
+        const indexAtCenter = Math.round((currentOffset + pointerOffset) / itemWidth);
         const item = roulette.children[indexAtCenter];
         const resultNumber = item ? item.textContent : "?";
 
@@ -153,3 +155,4 @@
   </script>
 </body>
 </html>
+
