@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Рулетка</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       height: 100vh;
       background: url('background_dark_hd.png') no-repeat center center fixed;
@@ -101,19 +97,21 @@
     const roulette = document.getElementById("roulette");
     const button = document.getElementById("spinBtn");
 
-    function renderItems(repeat = 50) {
-      roulette.innerHTML = '';
+    function renderItems(repeat = 200) {
+      const fragment = document.createDocumentFragment();
       for (let i = 0; i < repeat; i++) {
         for (let num of numbers) {
           const el = document.createElement("div");
           el.className = "item";
           el.textContent = num;
-          roulette.appendChild(el);
+          fragment.appendChild(el);
         }
       }
+      roulette.appendChild(fragment);
     }
 
     let isRolling = false;
+    let currentOffset = 0;
 
     function roll() {
       if (isRolling) return;
@@ -126,40 +124,26 @@
       const itemWidth = 90;
       const index = Math.floor(Math.random() * numbers.length);
       const rounds = Math.floor(Math.random() * 5 + 10);
-      const totalSteps = (numbers.length * rounds + index);
-      const offset = totalSteps * itemWidth - 120;
+      const stepCount = numbers.length * rounds + index;
+      const offset = stepCount * itemWidth;
 
-      const totalItems = roulette.children.length;
-      const neededItems = totalSteps + 5;
+      currentOffset += offset;
 
-      if (totalItems < neededItems) {
-        const toAdd = Math.ceil((neededItems - totalItems) / numbers.length);
-        for (let i = 0; i < toAdd; i++) {
-          for (let num of numbers) {
-            const el = document.createElement("div");
-            el.className = "item";
-            el.textContent = num;
-            roulette.appendChild(el);
-          }
-        }
+      // Проверка: если длина ленты меньше необходимой — добавим ещё
+      const requiredItems = Math.ceil(currentOffset / itemWidth) + numbers.length;
+      if (roulette.children.length < requiredItems) {
+        renderItems(50);
       }
 
-      roulette.style.transition = 'none';
-      roulette.style.transform = 'translateX(0px)';
+      roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
+      roulette.style.transform = `translateX(-${currentOffset}px)`;
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
-          roulette.style.transform = `translateX(-${offset}px)`;
-
-          setTimeout(() => {
-            result.textContent = `Выпало число: ${numbers[index]}`;
-            result.style.opacity = 1;
-            button.disabled = false;
-            isRolling = false;
-          }, 6100);
-        });
-      });
+      setTimeout(() => {
+        result.textContent = `Выпало число: ${numbers[index]}`;
+        result.style.opacity = 1;
+        button.disabled = false;
+        isRolling = false;
+      }, 6100);
     }
 
     renderItems();
