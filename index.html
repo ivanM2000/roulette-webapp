@@ -88,7 +88,7 @@
   <div class="result" id="result"></div>
 
   <script>
-    // Тасование Фишера–Йетса
+    // Функция тасования Fisher–Yates
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -100,14 +100,15 @@
     const spinBtn = document.getElementById('spinBtn');
     const result = document.getElementById('result');
 
-    const base = Array.from({length: 100}, (_, i) => i + 1);
-    shuffle(base);               // перемешиваем
-    const count = base.length;   // 100
-    const times = 5;             // дублируем 5 раз
-    const mid = Math.floor(times/2); // =2
-    const w = 60;                // ширина одного элемента в px
+    // создаём массив 1–100
+    const base = Array.from({ length: 100 }, (_, i) => i + 1);
+    shuffle(base);              // перемешиваем
+    const count = base.length;  // 100
+    const times = 7;            // дублируем 7 раз
+    const mid = Math.floor(times / 2); // =3
+    const w = 60;               // ширина одного элемента
 
-    // Собираем ленту
+    // строим ленту
     window.addEventListener('load', () => {
       for (let t = 0; t < times; t++) {
         base.forEach(n => {
@@ -119,6 +120,7 @@
       }
       // стартовая позиция — центр ленты
       const startIdx = mid * count;
+      roulette.style.transition = 'none';
       roulette.style.transform = `translateX(-${startIdx * w}px)`;
     });
 
@@ -126,22 +128,22 @@
       spinBtn.disabled = true;
       result.textContent = '';
 
-      // случайное число 1–100
+      // выпавшее число
       const num = Math.floor(Math.random() * count) + 1;
-      // циклов 1…(times-1)
-      const cyc = Math.floor(Math.random() * (times - 1)) + 1;
-      // находим индекс выпавшего в первом блоке
+      // циклов от 1 до times-2, чтобы не выехать за пределы
+      const cyc = Math.floor(Math.random() * (times - 2)) + 1;
+      // индекс в первом наборе
       const idxIn = base.indexOf(num);
-      // полный индекс в ленте: mid*count + cyc*count + idxIn
+      // полный индекс в ленте = mid*count + cyc*count + idxIn
       const idx = mid * count + cyc * count + idxIn;
       const px = idx * w;
 
-      // увеличиваем скорость: 2 секунды прокрутка
-      roulette.style.transition = 'transform 2s ease';
+      // увеличиваем скорость: прокрутка за 1.5 секунды
+      roulette.style.transition = 'transform 1.5s cubic-bezier(0.25,0.1,0.25,1)';
       roulette.style.transform = `translateX(-${px}px)`;
 
       roulette.addEventListener('transitionend', function handler() {
-        // сбрасываем без анимации
+        // убираем transition и фиксируем позицию в центре набора
         roulette.style.transition = 'none';
         const fixIdx = mid * count + idxIn;
         roulette.style.transform = `translateX(-${fixIdx * w}px)`;
