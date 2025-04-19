@@ -129,21 +129,27 @@
 
       const itemWidth = 90;
       const index = Math.floor(Math.random() * numbers.length);
-      const rounds = Math.floor(Math.random() * 5 + 10); // случайное количество оборотов
+      const rounds = Math.floor(Math.random() * 5 + 10);
       const offset = (numbers.length * rounds + index) * itemWidth - 120;
 
+      // Сброс в начало мгновенно (без анимации)
       roulette.style.transition = 'none';
-      void roulette.offsetWidth; // форсируем перерендер
+      roulette.style.transform = 'translateX(0px)';
 
-      roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
-      roulette.style.transform = `translateX(-${offset}px)`;
+      // Даем браузеру время отрисовать сброс, а затем анимируем прокрут
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
+          roulette.style.transform = `translateX(-${offset}px)`;
 
-      setTimeout(() => {
-        result.textContent = `Выпало число: ${numbers[index]}`;
-        result.style.opacity = 1;
-        button.disabled = false;
-        isRolling = false;
-      }, 6100);
+          setTimeout(() => {
+            result.textContent = `Выпало число: ${numbers[index]}`;
+            result.style.opacity = 1;
+            button.disabled = false;
+            isRolling = false;
+          }, 6100);
+        });
+      });
     }
 
     renderItems();
