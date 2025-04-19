@@ -103,7 +103,7 @@
 
     function renderItems() {
       roulette.innerHTML = '';
-      const allItems = [...numbers, ...numbers, ...numbers, ...numbers];
+      const allItems = [...numbers, ...numbers, ...numbers, ...numbers, ...numbers];
       for (let num of allItems) {
         const el = document.createElement("div");
         el.className = "item";
@@ -123,20 +123,24 @@
       result.style.opacity = 0;
 
       const itemWidth = 90;
-      const visibleItems = 3.5; // приблизительно сколько элементов видно в окне
-      const spins = 10 + Math.floor(Math.random() * 10); // сколько элементов прокрутить
       const index = Math.floor(Math.random() * numbers.length);
-      const offset = (numbers.length * 2 + index) * itemWidth - (itemWidth * visibleItems);
+      const baseOffset = (numbers.length * 2 + index) * itemWidth - 120;
 
-      roulette.style.transition = 'transform 5s ease-out';
-      roulette.style.transform = `translateX(-${offset}px)`;
+      roulette.style.transition = 'none';
+      roulette.style.transform = 'translateX(0px)';
+
+      // Запускаем с небольшой задержкой, чтобы reset применился
+      setTimeout(() => {
+        roulette.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+        roulette.style.transform = `translateX(-${baseOffset}px)`;
+      }, 20);
 
       setTimeout(() => {
         result.textContent = `Выпало число: ${numbers[index]}`;
         result.style.opacity = 1;
         button.disabled = false;
         isRolling = false;
-      }, 5100);
+      }, 5200);
     }
 
     renderItems();
