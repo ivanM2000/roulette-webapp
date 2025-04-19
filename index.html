@@ -1,7 +1,9 @@
+
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Горизонтальная рулетка</title>
   <style>
@@ -22,6 +24,7 @@
       position: relative;
       width: 80%;
       max-width: 800px;
+      height: 80px;
       overflow: hidden;
       border: 2px solid #444;
       border-radius: 8px;
@@ -32,7 +35,7 @@
       display: flex;
       transform: translateX(0);
     }
-    .roulette .item {
+    .item {
       flex: 0 0 80px;
       height: 80px;
       line-height: 80px;
@@ -43,7 +46,7 @@
       background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
       color: #ddd;
     }
-    .roulette .item:nth-child(odd) {
+    .item:nth-child(odd) {
       background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
     }
     .indicator {
@@ -80,71 +83,72 @@
 
   <div class="roulette-wrapper">
     <div class="indicator"></div>
-    <div class="roulette" id="roulette">
-      <!-- Дублируем 5 раз для длинной ленты -->
-      <!-- Блок 1 -->
-      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
-      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
-      <!-- Блок 2 -->
-      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
-      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
-      <!-- Блок 3 -->
-      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
-      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
-      <!-- Блок 4 -->
-      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
-      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
-      <!-- Блок 5 -->
-      <div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div><div class="item">5</div>
-      <div class="item">6</div><div class="item">7</div><div class="item">8</div><div class="item">9</div><div class="item">10</div>
-    </div>
+    <div class="roulette" id="roulette"></div>
   </div>
 
   <button class="btn" id="spinBtn">Крутить</button>
   <div class="result" id="result"></div>
 
   <script>
+    // Утилита для тасования Фишера–Йетса
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
     const roulette = document.getElementById('roulette');
     const spinBtn = document.getElementById('spinBtn');
     const result = document.getElementById('result');
 
-    const itemWidth = 80;      // ширина одного элемента
-    const count = 10;          // уникальных чисел
-    const times = 5;           // сколько раз продублировали
-    
+    const baseNumbers = [1,2,3,4,5,6,7,8,9,10];
+    const count = baseNumbers.length;
+    const times = 5;             // сколько раз повторяем
+    const midBlock = Math.floor(times / 2);
+    const itemWidth = 80;        // ширина одного элемента
+
+    let numbers = [...baseNumbers];
+    shuffle(numbers);            // перемешиваем один раз в начале
+
+    // Собираем ленту
+    window.addEventListener('load', () => {
+      for (let t = 0; t < times; t++) {
+        numbers.forEach(num => {
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.textContent = num;
+          roulette.appendChild(div);
+        });
+      }
+      // выставляем начальную позицию по центру ленты
+      const startIdx = midBlock * count;
+      roulette.style.transform = `translateX(-${startIdx * itemWidth}px)`;
+    });
+
     spinBtn.addEventListener('click', () => {
       spinBtn.disabled = true;
       result.textContent = '';
 
-      // случайное число 1–10
-      const number = Math.floor(Math.random() * count) + 1;
-      // циклов от 1 до times−1
+      const chosen = Math.floor(Math.random() * count) + 1;
       const cycles = Math.floor(Math.random() * (times - 1)) + 1;
-      // индекс позиции в ленте
-      const idx = cycles * count + (number - 1);
-      const shiftPx = idx * itemWidth;
+      const idxInBlock = numbers.indexOf(chosen);
+      const shiftElements = midBlock * count + cycles * count + idxInBlock;
+      const shiftPx = shiftElements * itemWidth;
 
-      // анимируем через transition
       roulette.style.transition = 'transform 4s ease';
       roulette.style.transform = `translateX(-${shiftPx}px)`;
 
       roulette.addEventListener('transitionend', function handler() {
         roulette.style.transition = 'none';
-        // фиксируем на позицию выбранного числа
-        roulette.style.transform = `translateX(-${idx * itemWidth}px)`;
+        // фиксируем указатель на выбранном элементе
+        const finalIdx = midBlock * count + idxInBlock;
+        roulette.style.transform = `translateX(-${finalIdx * itemWidth}px)`;
         spinBtn.disabled = false;
-        result.textContent = `Выпало число: ${number}`;
+        result.textContent = `Выпало число: ${chosen}`;
         roulette.removeEventListener('transitionend', handler);
       }, { once: true });
     });
-
-    // начальная позиция — середина ленты
-    window.onload = () => {
-      const startIdx = count * Math.floor(times/2);
-      roulette.style.transform = `translateX(-${startIdx * itemWidth}px)`;
-    };
   </script>
-
 </body>
 </html>
-
