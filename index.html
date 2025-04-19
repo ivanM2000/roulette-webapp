@@ -111,6 +111,7 @@
     }
 
     let isRolling = false;
+let totalOffset = 0;
 
     function roll() {
       if (isRolling) return;
@@ -126,7 +127,7 @@
       const rounds = Math.floor(Math.random() * 15 + 15);
       const index = Math.floor(Math.random() * numbers.length);
       const stepCount = numbers.length * rounds + index;
-      const offset = stepCount * itemWidth;
+      const offset = totalOffset + stepCount * itemWidth;
 
       const requiredItems = stepCount + numbers.length;
       if (roulette.children.length < requiredItems) {
@@ -135,6 +136,7 @@
 
       roulette.style.transition = `transform 6.5s cubic-bezier(0.25, 1, 0.35, 1)`;
       roulette.style.transform = `translateX(-${offset}px)`;
+      totalOffset = offset;
 
       setTimeout(() => {
         const indexAtCenter = Math.floor((offset + pointerOffset) / itemWidth);
