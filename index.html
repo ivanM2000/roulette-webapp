@@ -138,8 +138,7 @@
       roulette.style.transform = `translateX(-${currentOffset}px)`;
 
       setTimeout(() => {
-        const center = currentOffset + 160; // половина .roulette-wrapper ширины
-        const indexAtCenter = Math.floor(center / itemWidth);
+        const indexAtCenter = Math.round(currentOffset / itemWidth);
         const item = roulette.children[indexAtCenter];
         const resultNumber = item ? item.textContent : "?";
 
