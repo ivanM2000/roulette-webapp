@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Рулетка</title>
+  <title>Шар-рулетка</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      margin: 0;
+      padding: 0;
       height: 100vh;
       background: url('background_dark_hd.png') no-repeat center center fixed;
       background-size: cover;
@@ -17,47 +18,20 @@
       font-family: sans-serif;
       overflow: hidden;
     }
-    .roulette-wrapper {
-      position: relative;
-      width: 320px;
-      height: 100px;
-      overflow: hidden;
-      border-top: 3px solid rgba(255,255,255,0.3);
-      border-bottom: 3px solid rgba(255,255,255,0.3);
-    }
-    .roulette {
-      display: flex;
-      gap: 10px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      transform: translateX(0);
-    }
-    .item {
-      width: 80px;
-      height: 80px;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-size: 32px;
+    .ball {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.2), rgba(0,0,0,0.6));
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
-      flex-shrink: 0;
-      backdrop-filter: blur(5px);
-    }
-    .pointer {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 100%;
-      width: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-top: 20px solid white;
-      z-index: 2;
+      color: white;
+      font-size: 48px;
+      font-weight: bold;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+      position: relative;
+      transition: transform 0.3s ease;
     }
     .result {
       margin-top: 30px;
@@ -85,74 +59,35 @@
   </style>
 </head>
 <body>
-  <div class="roulette-wrapper">
-    <div class="pointer"></div>
-    <div class="roulette" id="roulette"></div>
-  </div>
+  <div class="ball" id="ball">?</div>
   <button id="spinBtn" onclick="roll()">Крутить</button>
   <div class="result" id="result"></div>
 
   <script>
-    const numbers = [5, 2, 9, 1, 6, 10, 4, 8, 3, 7];
-    const roulette = document.getElementById("roulette");
+    const ball = document.getElementById("ball");
+    const result = document.getElementById("result");
     const button = document.getElementById("spinBtn");
-
-    function renderItems(repeat = 200) {
-      const fragment = document.createDocumentFragment();
-      for (let i = 0; i < repeat; i++) {
-        for (let num of numbers) {
-          const el = document.createElement("div");
-          el.className = "item";
-          el.textContent = num;
-          fragment.appendChild(el);
-        }
-      }
-      roulette.appendChild(fragment);
-    }
-
-    let isRolling = false;
-let totalOffset = 0;
+    const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     function roll() {
-      if (isRolling) return;
-      isRolling = true;
+      if (button.disabled) return;
       button.disabled = true;
-
-      const result = document.getElementById("result");
       result.style.opacity = 0;
+      ball.textContent = "";
 
-      const itemWidth = 90;
-      const wrapperWidth = 320;
-      const pointerOffset = wrapperWidth / 2;
-      const rounds = 25 + Math.floor(Math.random() * 10);
-      const index = Math.floor(Math.random() * numbers.length);
-      const stepCount = numbers.length * rounds + index;
-      const offset = totalOffset + stepCount * itemWidth;
+      const randomIndex = Math.floor(Math.random() * numbers.length);
+      const number = numbers[randomIndex];
 
-      const requiredItems = stepCount + numbers.length;
-      if (roulette.children.length < requiredItems) {
-        renderItems(100);
-      }
-
-      const duration = 6.5;
-      roulette.style.transition = `transform ${duration}s linear`;
-      roulette.style.transform = `translateX(-${offset}px)`;
-      totalOffset = offset;
+      ball.style.transform = "scale(1.2) rotate(720deg)";
 
       setTimeout(() => {
-        const durationMs = duration * 1000;
-        const indexAtCenter = Math.floor((offset + pointerOffset) / itemWidth);
-        const item = roulette.children[indexAtCenter];
-        const resultNumber = item ? item.textContent : "?";
-
-        result.textContent = `Выпало число: ${resultNumber}`;
+        ball.textContent = number;
+        ball.style.transform = "scale(1) rotate(0deg)";
+        result.textContent = `Выпало число: ${number}`;
         result.style.opacity = 1;
         button.disabled = false;
-        isRolling = false;
-      }, durationMs + 100);
+      }, 1500);
     }
-
-    renderItems();
   </script>
 </body>
 </html>
