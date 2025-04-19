@@ -104,7 +104,7 @@
     function renderItems() {
       roulette.innerHTML = '';
       const allItems = [];
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 50; i++) {
         for (let num of numbers) {
           const el = document.createElement("div");
           el.className = "item";
@@ -128,25 +128,22 @@
       result.style.opacity = 0;
 
       const itemWidth = 90;
-      const visibleItems = 3.5;
       const index = Math.floor(Math.random() * numbers.length);
-      const baseOffset = (numbers.length * 20 + index) * itemWidth - visibleItems * itemWidth;
+      const rounds = Math.floor(Math.random() * 5 + 10); // случайное количество оборотов
+      const offset = (numbers.length * rounds + index) * itemWidth - 120;
 
       roulette.style.transition = 'none';
-      roulette.style.transform = 'translateX(0px)';
+      void roulette.offsetWidth; // форсируем перерендер
+
+      roulette.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.35, 1)';
+      roulette.style.transform = `translateX(-${offset}px)`;
 
       setTimeout(() => {
-        roulette.style.transition = 'transform 5s ease-out';
-        roulette.style.transform = `translateX(-${baseOffset}px)`;
-
-        setTimeout(() => {
-          result.textContent = `Выпало число: ${numbers[index]}`;
-          result.style.opacity = 1;
-          button.disabled = false;
-          isRolling = false;
-        }, 5100);
-
-      }, 50);
+        result.textContent = `Выпало число: ${numbers[index]}`;
+        result.style.opacity = 1;
+        button.disabled = false;
+        isRolling = false;
+      }, 6100);
     }
 
     renderItems();
