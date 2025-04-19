@@ -97,6 +97,7 @@
     const itemWidth = 90;
     let isRolling = false;
     let totalOffset = 0;
+let currentTranslate = 0;
 
     function shuffle(array) {
       const copy = [...array];
@@ -129,14 +130,23 @@
 
       const rounds = Math.floor(Math.random() * 5 + 20);
       const index = Math.floor(Math.random() * numbers.length);
-      const offset = totalOffset + (numbers.length * rounds + index) * itemWidth;
-      totalOffset = offset;
+      const steps = numbers.length * rounds + index;
+      const offset = steps * itemWidth;
+      // totalOffset no longer used
+
+      const requiredItems = Math.ceil(offset / itemWidth);
+      const currentItems = roulette.children.length;
+      if (currentItems < requiredItems + 20) {
+        const toAdd = Math.ceil((requiredItems + 20 - currentItems) / numbers.length);
+        renderItems(toAdd);
+      }
 
       const duration = 6.5;
       const durationMs = duration * 1000;
 
       roulette.style.transition = `transform ${duration}s cubic-bezier(0.25, 1, 0.35, 1)`;
-      roulette.style.transform = `translateX(-${offset}px)`;
+      currentTranslate -= offset;
+      roulette.style.transform = `translateX(${currentTranslate}px)`;
 
       setTimeout(() => {
         const centerIndex = Math.round((offset + 160) / itemWidth);
@@ -148,7 +158,11 @@
       }, durationMs + 100);
     }
 
-    renderItems();
+    renderItems(50);
+
+    // Дублируем содержимое для бесконечного эффекта
+    const clone = roulette.cloneNode(true);
+    roulette.appendChild(clone);
   </script>
 </body>
 </html>
