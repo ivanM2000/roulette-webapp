@@ -141,8 +141,8 @@
       roulette.style.transition = `transform ${duration}s ${easing}`;
       roulette.style.transform = `translateX(-${currentOffset}px)`;
 
+      const durationMs = parseFloat(duration) * 1000;
       setTimeout(() => {
-        const durationMs = parseFloat(duration) * 1000;
         const indexAtCenter = Math.round((currentOffset + pointerOffset) / itemWidth);
         const item = roulette.children[indexAtCenter];
         const resultNumber = item ? item.textContent : "?";
